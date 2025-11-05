@@ -2,12 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Temporary Ponds Database - Visor PNOA</title>
+  <title>Temporary Ponds Database - KML + Clustering + PNOA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link 
     rel="stylesheet" 
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
+  />
+  <link 
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+  />
+  <link 
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
   />
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
@@ -19,11 +26,13 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-  // Crear mapa y añadir ortofoto del PNOA
+  // Crear mapa base
   const map = L.map('map').setView([40.4, -3.7], 7);
 
+  // Ortofoto PNOA (IGN)
   const ortofoto = L.tileLayer.wms("https://www.ign.es/wms-inspire/pnoa-ma", {
     layers: "OI.OrthoimageCoverage",
     format: "image/jpeg",
@@ -31,16 +40,42 @@
     attribution: "© Instituto Geográfico Nacional (IGN) - PNOA"
   }).addTo(map);
 
-  // Cargar archivo KML desde el mismo repositorio
+  // Crear grupo de clúster
+  const markers = L.markerClusterGroup();
+
+  // Cargar KML
   const kmlLayer = omnivore.kml('temporary_ponds_database_V2_05_11.kml')
     .on('ready', function() {
-      map.fitBounds(kmlLayer.getBounds());
       console.log("✅ KML cargado correctamente");
+
+      // Transformar cada punto del KML en marcador
+      kmlLayer.eachLayer(function(layer) {
+        if (layer.getLatLng) {
+          const marker = L.marker(layer.getLatLng());
+
+          // Popup con atributos si existen
+          const props = layer.feature?.properties;
+          if (props) {
+            let popupContent = "<h4>Atributos</h4><ul>";
+            for (let key in props) {
+              popupContent += `<li><b>${key}:</b> ${props[key]}</li>`;
+            }
+            popupContent += "</ul>";
+            marker.bindPopup(popupContent);
+          }
+
+          markers.addLayer(marker);
+        }
+      });
+
+      // Añadir los clústeres al mapa
+      map.addLayer(markers);
+      map.fitBounds(markers.getBounds());
     })
     .on('error', function(e) {
       console.error("❌ Error al cargar el KML:", e.error);
-    })
-    .addTo(map);
+    });
+
 </script>
 
 </body>
