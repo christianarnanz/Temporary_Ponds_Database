@@ -5,11 +5,11 @@
   <title>Temporary Ponds Database - Visor con buscador</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet y estilos -->
+  <!-- Estilos Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/2.9.8/leaflet-search.min.css"/>
 
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
@@ -25,11 +25,13 @@
 
 <div id="map"></div>
 
-<!-- Scripts principales -->
+<!-- Scripts: Leaflet primero -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
-<script src="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.js"></script>
+
+<!-- Buscador: usar cdnjs y versión confirmada -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/2.9.8/leaflet-search.min.js"></script>
 
 <script>
   // Crear mapa base
@@ -43,10 +45,8 @@
     attribution: "© Instituto Geográfico Nacional (IGN) - PNOA"
   }).addTo(map);
 
-  // Crear grupo de clústeres
+  // Clústeres y capa de búsqueda
   const markers = L.markerClusterGroup();
-
-  // Crear capa para búsqueda
   const searchLayer = L.layerGroup();
 
   // Cargar KML
@@ -59,7 +59,6 @@
           const props = layer.feature?.properties;
           const name = props?.name || "Sin nombre";
 
-          // Crear marcador
           const marker = L.marker(layer.getLatLng());
           let popupContent = `<h4>${name}</h4><ul>`;
           for (let key in props) {
@@ -69,18 +68,15 @@
           marker.bindPopup(popupContent);
 
           marker.feature = { properties: { name: name } };
-
-          // Añadir marcador a clúster y búsqueda
           markers.addLayer(marker);
           searchLayer.addLayer(marker);
         }
       });
 
-      // Añadir los clústeres al mapa
       map.addLayer(markers);
       map.fitBounds(markers.getBounds());
 
-      // Añadir control de búsqueda
+      // ✅ Añadir buscador correctamente
       const searchControl = new L.Control.Search({
         layer: searchLayer,
         propertyName: 'name',
