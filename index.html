@@ -2,8 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Temporary Ponds Database - KML + Clustering + PNOA</title>
+  <title>Temporary Ponds Database - KML + Clustering + Buscador</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Estilos Leaflet -->
   <link 
     rel="stylesheet" 
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -16,17 +18,27 @@
     rel="stylesheet"
     href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
   />
+  <link 
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.css"
+  />
+
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
+    .leaflet-control-search {
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- Librerías Leaflet -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.js"></script>
 
 <script>
   // Crear mapa base
@@ -40,42 +52,57 @@
     attribution: "© Instituto Geográfico Nacional (IGN) - PNOA"
   }).addTo(map);
 
-  // Crear grupo de clúster
+  // Crear grupo de clúster y capa para búsqueda
   const markers = L.markerClusterGroup();
+  const searchLayer = L.layerGroup();
 
   // Cargar KML
   const kmlLayer = omnivore.kml('temporary_ponds_database_V2_05_11.kml')
     .on('ready', function() {
       console.log("✅ KML cargado correctamente");
 
-      // Transformar cada punto del KML en marcador
       kmlLayer.eachLayer(function(layer) {
         if (layer.getLatLng) {
-          const marker = L.marker(layer.getLatLng());
-
-          // Popup con atributos si existen
           const props = layer.feature?.properties;
-          if (props) {
-            let popupContent = "<h4>Atributos</h4><ul>";
-            for (let key in props) {
-              popupContent += `<li><b>${key}:</b> ${props[key]}</li>`;
-            }
-            popupContent += "</ul>";
-            marker.bindPopup(popupContent);
-          }
+          const name = props?.name || "Sin nombre";
 
+          const marker = L.marker(layer.getLatLng());
+          let popupContent = `<h4>${name}</h4><ul>`;
+          for (let key in props) {
+            popupContent += `<li><b>${key}:</b> ${props[key]}</li>`;
+          }
+          popupContent += "</ul>";
+          marker.bindPopup(popupContent);
+
+          // Añadir al grupo de clúster y a la capa de búsqueda
           markers.addLayer(marker);
+          searchLayer.addLayer(marker);
         }
       });
 
-      // Añadir los clústeres al mapa
+      // Añadir clústeres al mapa
       map.addLayer(markers);
       map.fitBounds(markers.getBounds());
+
+      // Añadir control de búsqueda
+      const searchControl = new L.Control.Search({
+        layer: searchLayer,
+        initial: false,
+        propertyName: 'name',
+        zoom: 14,
+        marker: false,
+        textPlaceholder: 'Buscar por nombre...'
+      });
+
+      searchControl.on('search:locationfound', function(e) {
+        e.layer.openPopup();
+      });
+
+      map.addControl(searchControl);
     })
     .on('error', function(e) {
       console.error("❌ Error al cargar el KML:", e.error);
     });
-
 </script>
 
 </body>
