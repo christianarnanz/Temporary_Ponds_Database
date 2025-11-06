@@ -9,17 +9,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
- <link 
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.min.css"
-/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.min.js"></script>
+
+  <!-- 🔍 Librería de búsqueda (versión segura cdnjs) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.9/leaflet-search.min.js"></script>
 
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
-    .leaflet-control-search {
-      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-      border-radius: 4px;
+    .leaflet-control-container .leaflet-control-search {
+      top: 10px !important;
+      right: 10px !important;
+      position: absolute !important;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -27,11 +28,10 @@
 
 <div id="map"></div>
 
-<!-- Librerías -->
+<!-- Librerías principales -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.js"></script>
 
 <script>
   // Crear mapa base
@@ -59,7 +59,7 @@
           const props = layer.feature?.properties;
           const name = props?.name || "Sin nombre";
 
-          // Crear marcador con popup
+          // Crear marcador
           const marker = L.marker(layer.getLatLng());
           let popupContent = `<h4>${name}</h4><ul>`;
           for (let key in props) {
@@ -79,7 +79,7 @@
       map.addLayer(markers);
       map.fitBounds(markers.getBounds());
 
-      // Añadir buscador
+      // ✅ Añadir buscador
       const searchControl = new L.Control.Search({
         layer: searchLayer,
         propertyName: 'name',
