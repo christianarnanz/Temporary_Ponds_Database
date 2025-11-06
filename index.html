@@ -4,29 +4,18 @@
   <meta charset="utf-8" />
   <title>Temporary Ponds Database - KML + Clustering + Buscador</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <!-- Estilos Leaflet -->
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <link 
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
-  />
-  <link 
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
-  />
-  <link 
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-search@2.9.8/dist/leaflet-search.min.css"/>
 
   <style>
     html, body, #map { height: 100%; margin: 0; padding: 0; }
     .leaflet-control-search {
       box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -34,7 +23,7 @@
 
 <div id="map"></div>
 
-<!-- Librerías Leaflet -->
+<!-- Librerías -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
@@ -44,7 +33,7 @@
   // Crear mapa base
   const map = L.map('map').setView([40.4, -3.7], 7);
 
-  // Ortofoto PNOA (IGN)
+  // Capa base PNOA
   const ortofoto = L.tileLayer.wms("https://www.ign.es/wms-inspire/pnoa-ma", {
     layers: "OI.OrthoimageCoverage",
     format: "image/jpeg",
@@ -52,7 +41,7 @@
     attribution: "© Instituto Geográfico Nacional (IGN) - PNOA"
   }).addTo(map);
 
-  // Crear grupo de clúster y capa para búsqueda
+  // Clústeres y capa de búsqueda
   const markers = L.markerClusterGroup();
   const searchLayer = L.layerGroup();
 
@@ -66,6 +55,7 @@
           const props = layer.feature?.properties;
           const name = props?.name || "Sin nombre";
 
+          // Crear marcador con popup
           const marker = L.marker(layer.getLatLng());
           let popupContent = `<h4>${name}</h4><ul>`;
           for (let key in props) {
@@ -74,24 +64,26 @@
           popupContent += "</ul>";
           marker.bindPopup(popupContent);
 
-          // Añadir al grupo de clúster y a la capa de búsqueda
+          // Guardar el nombre dentro del marcador (para búsqueda)
+          marker.feature = { properties: { name: name } };
+
           markers.addLayer(marker);
           searchLayer.addLayer(marker);
         }
       });
 
-      // Añadir clústeres al mapa
       map.addLayer(markers);
       map.fitBounds(markers.getBounds());
 
-      // Añadir control de búsqueda
+      // Añadir buscador
       const searchControl = new L.Control.Search({
         layer: searchLayer,
-        initial: false,
         propertyName: 'name',
-        zoom: 14,
+        textPlaceholder: 'Buscar por nombre...',
         marker: false,
-        textPlaceholder: 'Buscar por nombre...'
+        moveToLocation: function(latlng, title, map) {
+          map.setView(latlng, 14);
+        }
       });
 
       searchControl.on('search:locationfound', function(e) {
