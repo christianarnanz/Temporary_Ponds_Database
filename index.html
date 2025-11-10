@@ -2,26 +2,45 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Temporary Ponds Database - Visor con buscador autocompletar</title>
+  <title>Temporary Ponds Database - Visor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Leaflet y complementos -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
   <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-    #search-box {
+    html, body, #map { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+    /* --- TÍTULO SUPERIOR --- */
+    #title {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 1000;
+      z-index: 1200;
+      background: rgba(255,255,255,0.8);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    /* --- BUSCADOR --- */
+    #search-box {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
       background: white;
       padding: 6px 10px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      font-family: sans-serif;
       width: 260px;
     }
     #search-input {
@@ -32,7 +51,7 @@
     }
     #suggestions {
       position: absolute;
-      top: 40px;
+      top: 100px;
       left: 50%;
       transform: translateX(-50%);
       width: 260px;
@@ -42,6 +61,7 @@
       display: none;
       max-height: 150px;
       overflow-y: auto;
+      z-index: 1100;
     }
     .suggestion {
       padding: 6px 10px;
@@ -50,17 +70,43 @@
     .suggestion:hover {
       background: #f0f0f0;
     }
+
+    /* --- LOGO ABAJO A LA DERECHA --- */
+    #logo-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 12px;
+      padding: 6px 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #logo {
+      width: 90px; /* Ajusta el tamaño del logo */
+      height: auto;
+    }
   </style>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- Título principal -->
+<div id="title">Temporary Ponds Database</div>
+
+<!-- Buscador -->
 <div id="search-box">
-  <input type="text" id="search-input" placeholder="Buscar por nombre...">
+  <input type="text" id="search-input" placeholder="Find by name...">
 </div>
 <div id="suggestions"></div>
 
+<!-- Logo -->
+<div id="logo-container">
+  <img src="logo.png" alt="Temporary Ponds Database" id="logo">
+</div>
+
+<!-- Scripts -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
@@ -68,7 +114,7 @@
 <script>
   const map = L.map('map').setView([40.4, -3.7], 7);
 
-  // Ortofoto PNOA
+  // Capa base: Ortofoto PNOA
   const ortofoto = L.tileLayer.wms("https://www.ign.es/wms-inspire/pnoa-ma", {
     layers: "OI.OrthoimageCoverage",
     format: "image/jpeg",
@@ -76,6 +122,7 @@
     attribution: "© Instituto Geográfico Nacional (IGN) - PNOA"
   }).addTo(map);
 
+  // Crear clúster
   const markers = L.markerClusterGroup({ 
     disableClusteringAtZoom: 12,
     chunkedLoading: true,
