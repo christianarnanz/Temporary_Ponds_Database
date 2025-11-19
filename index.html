@@ -17,6 +17,10 @@
     padding: 0;
     font-family: 'Segoe UI', sans-serif;
   }
+      /* Aumentar z-index del control de capas para que se vea encima de la cabecera */
+  .leaflet-control-layers {
+    z-index: 2000 !important;
+  }
 
   /* --- CABECERA SUPERIOR --- */
   #header {
@@ -209,11 +213,11 @@
   pnoaActual.addTo(map);
 
   const baseMaps = {
-    "🛰️ PNOA Actual": pnoaActual,
-    "📚 Mapa Base IGN": mtnRaster,
-    "🗺️ MTN25 (Topográfico 1:25.000)": mtn25,
-    "🗺️ MTN50 (Topográfico 1:50.000)": mtb50,
-    "📸 Vuelo Americano 1956/57": vuelo1956
+    "🛰️ PNOA (up-to date": pnoaActual,
+    "📚 National Topographic Map IGN": mtnRaster,
+    "🗺️ MTN25 (Topográphic 1:25.000)": mtn25,
+    "🗺️ MTN50 (Topográphic 1:50.000)": mtb50,
+    "📸 American flight 1956/57": vuelo1956
   };
 
   L.control.layers(baseMaps, null, { position: 'topright', collapsed: true }).addTo(map);
