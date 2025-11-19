@@ -205,11 +205,12 @@ const vuelo1956 = L.tileLayer.wms(
   }
 );
 const primeraEdicionMTN50 = L.tileLayer(
-  "https://www.ign.es/wmts/primera-edicion-mtn?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=mtn50-edicion1&STYLE=default&TILEMATRIXSET=EPSG:4326&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg",
+  "https://www.ign.es/wmts/primera-edicion-mtn?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=mtn50-edicion1&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg",
   { maxZoom: 19, attribution: "© IGN – MTN 50 Edición 1" }
 );
+
 const primeraEdicionMTN25 = L.tileLayer(
-  "https://www.ign.es/wmts/primera-edicion-mtn?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=mtn25-edicion1&STYLE=default&TILEMATRIXSET=EPSG:4326&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg",
+  "https://www.ign.es/wmts/primera-edicion-mtn?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=mtn25-edicion1&STYLE=default&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg",
   { maxZoom: 19, attribution: "© IGN – MTN 25 Edición 1" }
 );
 
